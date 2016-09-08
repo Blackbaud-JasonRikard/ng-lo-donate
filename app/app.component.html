@@ -7,97 +7,107 @@
         window.designation_options = '[[T6:[[?TT::[[?yy::y[[S334:experience]]y::F::T]][[?xTRUEx::x[[E151:[[S334:experience]]_funds]]x::T::F]]::[[E51:[[S334:experience]]_funds]]::[[?xTRUEx::x[[E151:[[S334:pagename]]_funds]]x::[[E51:[[S334:pagename]]_funds]]::[[S51:donate_api_funds]]]]]]]]';
         window.success_redirect = "[[S11:23]][[?[[S11:23]]::&::&::?]]pagename=[[?TT::[[?yy::y[[S334:experience]]y::F::T]][[?xTRUEx::x[[E151:[[S334:experience]]_thanks]]x::T::F]]::[[S334:experience]]_thanks::[[?xTRUEx::x[[E151:[[S334:pagename]]_thanks]]x::[[S334:pagename]]_thanks::donate_api_thanks]]]]";
     </script>
-    <div id="donate" class="donate-container">
-        <div class="donate-row">
-            <div class="donate-row clearfix spacer"></div>
-            <div id="donate_form_success" class="donate-row" style="display:none;"></div>
-            <div class="donate-row donate-form-error" id="donate_form_error_top" style="display:none;"><h4
+    <div id="donate" class="" [ngClass]="{submitted: submitAttempt === true }">
+
+        <!--{{heroForm.value | json}}-->
+        <!--{{donation | json}}-->
+
+            <div class="row clearfix spacer"></div>
+            <div id="donate_form_success" class="row" style="display:none;"></div>
+            <div class="row donate-form-error" id="donate_form_error_top" style="display:none;"><h4
                     class="error">Error: Your donation failed to process. Please verify your payment information and try
                 again.</h4></div>
-            <form id="donate_form" novalidate="novalidate">
-                <input type="hidden" value="donate" name="method" id="donate_api_method">
-                <input type="hidden" value="1.0" name="v">
-                <!-- add hidden input for extproc -->
-                <input type="hidden" name="extproc" id="inptextproc" value="paypal">
-                <!-- add PayPal/Amazon SUCCESS redrect (must be static url) -->
-                <input type="hidden"
-                       value="[[S11:23]][[?[[S11:23]]::&::&::?]]pagename=[[?xTRUEx::x[[E151:[[S334:pagename]]_thanks]]x::[[S334:pagename]]_thanks::donate_api_thanks]]"
-                       name="finish_success_redirect" id="finish_success_redirect">
-                <!-- add PayPal/Amazon ERROR redrect must be static url) -->
-                <input type="hidden"
-                       value="[[S11:23]][[?[[S11:23]]::&::&::?]]pagename=[[?xTRUEx::x[[E151:[[S334:pagename]]_error]]x::[[S334:pagename]]_error::donate_api_error]]"
-                       name="finish_error_redirect" id="finish_error_redirect">
+            <form id="donate_form"  (ngSubmit)="onSubmit(heroForm)" #heroForm="ngForm" novalidate>
+                <input [(ngModel)]="donation.method" type="hidden" value="donate" name="method" id="donate_api_method">
+
+                <input ngModel type="hidden" value="1.0" name="v">
+                <span *ngIf="donation.paymentType === 'paypal'">
+                    <!-- add hidden input for extproc -->
+                    <input ngModel type="hidden" name="extproc" id="inptextproc" value="paypal">
+                    <!-- add PayPal/Amazon SUCCESS redrect (must be static url) -->
+                    <input ngModel type="hidden"
+                           value=""
+                           name="finish_success_redirect" id="finish_success_redirect">
+                    <!-- add PayPal/Amazon ERROR redrect must be static url) -->
+                    <input ngModel type="hidden"
+                           value=""
+                           name="finish_error_redirect" id="finish_error_redirect">
+                </span>
                 <!-- Change/add donation form id and level ids below -->
-                <input type="hidden" value="{{formId}}" name="form_id">
-                <input type="hidden" value="true" name="validate">
-                <!--[[?x[[S334:df_preview]]x::xtruex::<input type="hidden" value="true" name="df_preview">::]]-->
-                <div class="donate-row">
-                    <fieldset id="donation_information">
-                        <h4 class="section-header donate-xs-col-12">DONATION<span id="required_field_ind_help">(* = required field)&nbsp;</span>
+                <input type="hidden" value="" name="form_id" [(ngModel)]="donation.formId">
+                <input [(ngModel)]="donation.validate" type="hidden" value="true" name="validate">
+                <input [(ngModel)]="donation.debug" type="hidden" name="df_preview" *ngIf="donation.debug === true">
+
+                <div class="row">
+                    <fieldset id="donation_information" class="col-xs-12">
+                        <h4 class="section-header">DONATION<span id="required_field_ind_help">(* = required field)&nbsp;</span>
                         </h4>
-                        <fieldset id="donation_amounts" class="selection-buttons donate-xs-col-12">
+                        <fieldset id="donation_amounts" class="selection-buttons">
                             <!-- donation levels generated here -->
+
+                            <div *ngIf="submitAttempt && donation.level === ''" class="error">
+                                <span class="donate-exclamation-mark" aria-hidden="true">
+                                <img src="../img/warning_exclamation.png"></span><span class="sr-only">Error:</span> This field is required</div>
                             <div class="donation-button-container selection-button-container"
                                  *ngFor="let level of formInfo?.donationLevels?.donationLevel">
                                 <div class="selection-button-inner" *ngIf="level.userSpecified === 'false'">
                                     <label attr.for="level_{{level.level_id}}"
-                                           class="donation-amount-button selection-button">
+                                           class="donation-amount-button selection-button" [ngClass]="{selected: donation.level === level.level_id }">
                                         <input type="radio" value="{{level.level_id}}" name="level_id"
-                                               id="level_{{level.level_id}}">
+                                               id="level_{{level.level_id}}" [(ngModel)]="donation.level" required>
                                         <span class="selection-button-text">{{level.amount.formatted}}</span>
                                     </label>
                                 </div>
                                 <div class="selection-button-inner" *ngIf="level.userSpecified === 'true'">
                                     <label attr.for="level_{{level.level_id}}"
-                                           class="donation-amount-button donation-amount-other-button selection-button">
+                                           class="donation-amount-button donation-amount-other-button selection-button" [ngClass]="{selected: donation.level === level.level_id }">
                                         <input type="radio" value="{{level.level_id}}" name="level_id"
-                                               id="level_{{level.level_id}}">
-                                        <span class="selection-button-text" id="level_amt_other_words">Other</span>
-                                        <span class="selection-button-text" id="level_amt_other_value">
-		<span>$</span><input type="text" name="other_amount" id="level_amt_other_input" required data-rule-min="5"
-                             data-rule-number="true">
+                                               id="level_{{level.level_id}}" [(ngModel)]="donation.level" required>
+                                        <span class="selection-button-text" id="level_amt_other_words" *ngIf="donation.level !== level.level_id">Other</span>
+                                        <span class="selection-button-text" id="level_amt_other_value"  *ngIf="donation.level === level.level_id">
+		<span>$</span><input ngModel type="text" name="other_amount" id="level_amt_other_input" required>
 								</span>
                                     </label>
                                 </div>
                             </div>
                         </fieldset>
-                        <div class="donate-xs-col-12 clearfix spacer"></div>
-                        <div class="donate-xs-col-12">
-                            <div class="checkbox-container">
-                                <input type="checkbox" name="level_autorepeat" id="level_autorepeat">
+                        <div class=" clearfix spacer"></div>
+                        <div class="" *ngIf="formInfo?.supportsLevelAutorepeat === 'true'">
+                            <div class="checkbox-container" [ngClass]="{selected: donation.recurring === true }">
+                                <input type="checkbox" name="level_autorepeat" id="level_autorepeat" [(ngModel)]="donation.recurring">
                                 <label for="level_autorepeat" class="checkbox-label">Yes, make this a recurring MONTHLY
                                     DONATION.</label>
                             </div>
                         </div>
-                        <div class="donate-xs-col-12 clearfix spacer"></div>
-                        <h4 class="section-subheader donate-xs-col-12">Directed Fund Option</h4>
-                        <div class="donate-xs-col-12">
+                        <div class="" *ngIf="formInfo?.supportsDesignation === 'true'">
+                            <h4 class="section-header">Direct my gift to:</h4>
                             <div class="donate-select">
-                                <label for="directed_fund_option" class="sr-only">Directed Fund Option</label>
-                                <select name="directed_fund_option" id="directed_fund_option">
+                                <label for="single_designee" class="sr-only">Direct my gift to:</label>
+                                <select ngModel name="single_designee" id="single_designee">
+                                    <option *ngFor="let designee of formDesignees?.designee" value="{{designee.id}}">{{designee.name}}</option>
                                 </select>
                             </div>
                         </div>
-                        <div class="donate-xs-col-12 clearfix spacer"></div>
-                        <div class="donate-xs-col-12 clearfix spacer"></div>
+                        <div class="clearfix spacer"></div>
+                        <div class=" clearfix spacer"></div>
                     </fieldset>
                 </div>
-                <div class="donate-row spacer-line"></div>
-                <div class="donate-row">
-                    <h4 class="section-header donate-xs-col-12">DEDICATION</h4>
-                    <fieldset id="honor_memorial_options" class="selection-buttons donate-xs-col-12">
+                <div class="spacer-line"></div>
+                <div class="row" *ngIf="formInfo?.supportsTribute === 'true'">
+                    <h4 class="section-header col-xs-12">DEDICATION</h4>
+                    <fieldset id="honor_memorial_options" class="selection-buttons col-xs-12">
                         <div class="selection-button-container three-button-container">
                             <div class="selection-button-inner">
-                                <label for="honor_memorial_none" class="selection-button">
-                                    <input type="radio" value="" name="tribute.type" id="honor_memorial_none">
+                                <label for="honor_memorial_none" class="selection-button" [ngClass]="{selected: donation.tributeType === '' }">
+                                    <input type="radio" value="" name="tribute.type" id="honor_memorial_none" [(ngModel)]="donation.tributeType">
                                     <span class="selection-button-text">None</span>
                                 </label>
                             </div>
                         </div>
                         <div class="selection-button-container three-button-container">
                             <div class="selection-button-inner">
-                                <label for="honor_memorial_honor" class="selection-button">
-                                    <input type="radio" value="tribute" name="tribute.type" id="honor_memorial_honor">
+                                <label for="honor_memorial_honor" class="selection-button" [ngClass]="{selected: donation.tributeType === 'tribute' }">
+                                    <input type="radio" value="tribute" name="tribute.type" id="honor_memorial_honor" [(ngModel)]="donation.tributeType">
                                     <span class="selection-button-text">In Honor<span
                                             class="donate-xs-hidden"> of</span></span>
                                 </label>
@@ -105,50 +115,50 @@
                         </div>
                         <div class="selection-button-container three-button-container">
                             <div class="selection-button-inner">
-                                <label for="honor_memorial_memorial" class="selection-button">
+                                <label for="honor_memorial_memorial" class="selection-button" [ngClass]="{selected: donation.tributeType === 'memorial' }">
                                     <input type="radio" value="memorial" name="tribute.type"
-                                           id="honor_memorial_memorial">
+                                           id="honor_memorial_memorial" [(ngModel)]="donation.tributeType">
                                     <span class="selection-button-text">In Memory<span
                                             class="donate-xs-hidden"> of</span></span>
                                 </label>
                             </div>
                         </div>
                     </fieldset>
-                    <div style="display:none;" id="memorial_help_text" class="donate-xs-col-12">Choose "In Memory<span
+                    <div id="memorial_help_text" class="col-xs-12" *ngIf="donation.tributeType === 'memorial'">Choose "In Memory<span
                             class="donate-xs-hidden"> of</span>" only if the person you are honoring is deceased.
                     </div>
-                    <div class="donate-xs-col-12 clearfix spacer"></div>
-                    <fieldset style="display:none;" id="honoree-information">
-                        <div class="donate-sm-col-6 donate-xs-col-12">
+                    <div class="col-xs-12 clearfix spacer"></div>
+                    <fieldset id="honoree-information" *ngIf="donation.tributeType !== ''">
+                        <div class="col-sm-6 col-xs-12">
                             <label for="honoree_name_first" class="sr-only">Honoree First Name*</label>
-                            <input type="text" name="tribute.honoree.name.first" id="honoree_name_first"
+                            <input ngModel type="text" name="tribute.honoree.name.first" id="honoree_name_first"
                                    placeholder="Honoree First Name*" required>
                         </div>
-                        <div class="donate-sm-col-6 donate-xs-col-12">
+                        <div class="col-sm-6 col-xs-12">
                             <label for="honoree_name_last" class="sr-only">Honoree Last Name*</label>
-                            <input type="text" name="tribute.honoree.name.last" id="honoree_name_last"
+                            <input ngModel type="text" name="tribute.honoree.name.last" id="honoree_name_last"
                                    placeholder="Honoree Last Name*" required>
                         </div>
                     </fieldset>
-                    <div class="donate-xs-col-12 clearfix spacer"></div>
-                    <div class="donate-xs-col-12 clearfix spacer"></div>
+                    <div class="col-xs-12 clearfix spacer"></div>
+                    <div class="col-xs-12 clearfix spacer"></div>
                 </div>
-                <div class="donate-row spacer-line" id="tribute_card_spacer"></div>
-                <div class="donate-row">
-                    <h4 class="section-header donate-xs-col-12">TRIBUTE CARD</h4>
-                    <fieldset id="tribute_options" class="selection-buttons donate-xs-col-12">
+                <div class="spacer-line" id="tribute_card_spacer" *ngIf="formInfo?.supportsTribute === 'true'"></div>
+                <div class="row" *ngIf="formInfo?.supportsEcard === 'true' && donation.tributeType !== ''">
+                    <h4 class="section-header col-xs-12">TRIBUTE CARD</h4>
+                    <fieldset id="tribute_options" class="selection-buttons col-xs-12">
                         <div class="selection-button-container three-button-container">
                             <div class="selection-button-inner">
-                                <label for="tribute_none" class="selection-button">
-                                    <input type="radio" value="none" name="tribute_option" id="tribute_none">
+                                <label for="tribute_none" class="selection-button" [ngClass]="{selected: donation.tributeCardType === 'none' }">
+                                    <input type="radio" value="none" name="tribute_option" id="tribute_none" [(ngModel)]="donation.tributeCardType">
                                     <span class="selection-button-text">None</span>
                                 </label>
                             </div>
                         </div>
                         <div class="selection-button-container three-button-container">
                             <div class="selection-button-inner">
-                                <label for="tribute_print" class="selection-button">
-                                    <input type="radio" value="print" name="tribute_option" id="tribute_print">
+                                <label for="tribute_print" class="selection-button" [ngClass]="{selected: donation.tributeCardType === 'print' }">
+                                    <input type="radio" value="print" name="tribute_option" id="tribute_print" [(ngModel)]="donation.tributeCardType">
                                     <span class="selection-button-text selection-button-long-text"><span
                                             class="donate-xs-hidden">Send </span>Printed Card</span>
                                 </label>
@@ -156,49 +166,48 @@
                         </div>
                         <div class="selection-button-container three-button-container">
                             <div class="selection-button-inner">
-                                <label for="tribute_ecard" class="selection-button">
-                                    <input type="radio" value="ecard" name="tribute_option" id="tribute_ecard">
+                                <label for="tribute_ecard" class="selection-button" [ngClass]="{selected: donation.tributeCardType === 'ecard' }">
+                                    <input type="radio" value="ecard" name="tribute_option" id="tribute_ecard" [(ngModel)]="donation.tributeCardType">
                                     <span class="selection-button-text"><span class="donate-xs-hidden">Send </span>E-Card</span>
                                 </label>
                             </div>
                         </div>
-                        <input type="hidden" name="ecard.send" value="false" id="ecard_send">
                     </fieldset>
-                    <div class="donate-xs-col-12 clearfix spacer"></div>
-                    <fieldset style="display:none;" id="tribute_print_fields">
-                        <h4 class="section-subheader donate-xs-col-12">Recipient Name &amp; Address</h4>
-                        <div class="donate-sm-col-6 donate-xs-col-12">
+                    <div class="col-xs-12 clearfix spacer"></div>
+                    <fieldset id="tribute_print_fields" *ngIf="donation.tributeCardType === 'print'">
+                        <h4 class="section-subheader col-xs-12">Recipient Name &amp; Address</h4>
+                        <div class="col-sm-6 col-xs-12">
                             <label for="tribute_print_name_first" class="sr-only">First Name*</label>
-                            <input type="text" name="tribute.notify.name.first" id="tribute_print_name_first"
+                            <input ngModel type="text" name="tribute.notify.name.first" id="tribute_print_name_first"
                                    placeholder="First Name*" required>
                         </div>
-                        <div class="donate-sm-col-6 donate-xs-col-12">
+                        <div class="col-sm-6 col-xs-12">
                             <label for="tribute_print_name_last" class="sr-only">Last Name*</label>
-                            <input type="text" name="tribute.notify.name.last" id="tribute_print_name_last"
+                            <input ngModel type="text" name="tribute.notify.name.last" id="tribute_print_name_last"
                                    placeholder="Last Name*" required>
                         </div>
-                        <input type="hidden" name="tribute.notify.name.full" id="tribute_print_name_full">
-                        <div class="donate-xs-col-12 clearfix"></div>
-                        <div class="donate-sm-col-6 donate-xs-col-12">
+                        <!--<input ngModel type="hidden" name="tribute.notify.name.full" id="tribute_print_name_full">-->
+                        <div class="col-xs-12 clearfix"></div>
+                        <div class="col-sm-6 col-xs-12">
                             <label for="tribute_print_address_street1" class="sr-only">Street Address Line 1*</label>
-                            <input type="text" name="tribute.notify.address.street1" id="tribute_print_address_street1"
+                            <input ngModel type="text" name="tribute.notify.address.street1" id="tribute_print_address_street1"
                                    placeholder="Street Address Line 1*" required>
                         </div>
-                        <div class="donate-sm-col-6 donate-xs-col-12">
+                        <div class="col-sm-6 col-xs-12">
                             <label for="tribute_print_address_street2" class="sr-only">Street Address Line 2</label>
-                            <input type="text" name="tribute.notify.address.street2" id="tribute_print_address_street2"
+                            <input ngModel type="text" name="tribute.notify.address.street2" id="tribute_print_address_street2"
                                    placeholder="Street Address Line 2">
                         </div>
-                        <div class="donate-xs-col-12 clearfix"></div>
-                        <div class="donate-sm-col-6 donate-xs-col-12">
+                        <div class="col-xs-12 clearfix"></div>
+                        <div class="col-sm-6 col-xs-12">
                             <label for="tribute_print_address_city" class="sr-only">City*</label>
-                            <input type="text" name="tribute.notify.address.city" id="tribute_print_address_city"
+                            <input ngModel type="text" name="tribute.notify.address.city" id="tribute_print_address_city"
                                    placeholder="City*" required>
                         </div>
-                        <div class="donate-sm-col-3 donate-xs-col-12">
+                        <div class="col-sm-3 col-xs-12">
                             <div class="donate-select">
                                 <label for="tribute_print_address_state" class="sr-only">State*</label>
-                                <select name="tribute.notify.address.state" id="tribute_print_address_state" required>
+                                <select ngModel name="tribute.notify.address.state" id="tribute_print_address_state" required>
                                     <option value="" selected>State*</option>
                                     <option value="AK">AK - Alaska</option>
                                     <option value="AL">AL - Alabama</option>
@@ -279,16 +288,16 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="donate-sm-col-3 donate-xs-col-12">
+                        <div class="col-sm-3 col-xs-12">
                             <label for="tribute_print_address_zip" class="sr-only">ZIP*</label>
-                            <input type="text" name="tribute.notify.address.zip" id="tribute_print_address_zip"
+                            <input ngModel type="text" name="tribute.notify.address.zip" id="tribute_print_address_zip"
                                    placeholder="ZIP*" required>
                         </div>
-                        <div class="donate-xs-col-12 clearfix"></div>
-                        <div class="donate-sm-col-6 donate-xs-col-12">
+                        <div class="col-xs-12 clearfix"></div>
+                        <div class="col-sm-6 col-xs-12">
                             <div class="donate-select">
                                 <label for="tribute_print_address_country" class="sr-only">Country*</label>
-                                <select name="tribute.notify.address.country" id="tribute_print_address_country"
+                                <select ngModel name="tribute.notify.address.country" id="tribute_print_address_country"
                                         required>
                                     <option value="" selected>Country*</option>
                                     <option value="United States">United States</option>
@@ -552,29 +561,28 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="donate-xs-col-12 clearfix spacer"></div>
-                        <div class="donate-xs-col-12 clearfix spacer"></div>
-                        <h4 class="section-subheader donate-xs-col-12">Personal Message (optional)</h4>
-                        <div class="donate-xs-col-12">
+                        <div class="col-xs-12 clearfix spacer"></div>
+                        <div class="col-xs-12 clearfix spacer"></div>
+                        <h4 class="section-subheader col-xs-12">Personal Message (optional)</h4>
+                        <div class="col-xs-12">
                             <label for="tribute_message" class="sr-only">Type your message here</label>
                             <label id="tribute_message_length_warning" class="error" for="tribute_message"
                                    style="display:none;">&nbsp;<span aria-hidden="true" class="donate-exclamation-mark">
             <!--<img src="../img/warning_exclamation.png">-->
           </span><span class="sr-only">Error:</span> The maximum length of your message is 255 characters.</label>
                             <textarea name="ecard.message" id="tribute_message" rows="3"
-                                      placeholder="Type your message here" maxlength="255"
-                                      data-maxlength="255"></textarea>
+                                      placeholder="Type your message here" maxlength="255"></textarea>
                         </div>
-                        <div class="donate-xs-col-12 clearfix"></div>
-                        <div class="donate-xs-col-12">
+                        <div class="col-xs-12 clearfix"></div>
+                        <div class="col-xs-12">
                             <label for="tribute_print_closing" class="sr-only">Closing signature</label>
-                            <input type="text" name="tribute.message.signature" id="tribute_print_closing"
+                            <input ngModel type="text" name="tribute.message.signature" id="tribute_print_closing"
                                    placeholder="Closing signature">
                         </div>
-                        <div class="donate-xs-col-12 clearfix spacer"></div>
-                        <h4 class="section-subheader donate-sm-col-12 donate-xs-hidden">Card Preview</h4>
-                        <div class="donate-xs-col-12 clearfix spacer"></div>
-                        <div class="donate-sm-col-4 donate-xs-hidden">
+                        <div class="col-xs-12 clearfix spacer"></div>
+                        <!--<h4 class="section-subheader col-sm-12 donate-xs-hidden">Card Preview</h4>-->
+                        <div class="col-xs-12 clearfix spacer"></div>
+                        <div class="col-sm-4 donate-xs-hidden">
                             <a href="#ecard_front" class="ecard-preview" rel="modal:open">
                                 <!--<img class="img-responsive" src="../img/2014_MemoryCardFinal_Preview_FRONT.jpg">-->
                             </a>
@@ -587,7 +595,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="donate-sm-col-4 donate-xs-hidden">
+                        <div class="col-sm-4 donate-xs-hidden">
                             <a href="#ecard_inside" class="ecard-preview" rel="modal:open">
                                 <!--<img class="img-responsive" src="../img/2014_MemoryCardFinal_Preview_INSIDE.jpg">-->
                             </a>
@@ -602,7 +610,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="donate-sm-col-4 donate-xs-hidden">
+                        <div class="col-sm-4 donate-xs-hidden">
                             <a href="#ecard_back" class="ecard-preview" rel="modal:open">
                                 <!--<img class="img-responsive" src="../img/2014_MemoryCardFinal_Preview_BACK.jpg">-->
                             </a>
@@ -615,21 +623,22 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="donate-sm-col-12 donate-xs-hidden clearfix spacer"></div>
+                        <div class="col-sm-12 donate-xs-hidden clearfix spacer"></div>
                     </fieldset>
-                    <fieldset style="display:none;" id="tribute_ecard_fields">
-                        <div class="donate-sm-col-6 donate-xs-col-12">
+                    <fieldset id="tribute_ecard_fields"  *ngIf="donation.tributeCardType === 'ecard'">
+                        <input ngModel type="hidden" name="ecard.send" value="true" id="ecard_send">
+                        <div class="col-sm-6 col-xs-12">
                             <label for="tribute_ecard_recipients" class="sr-only">Recipient's Email Address*</label>
-                            <input type="text" name="ecard.recipients" id="tribute_ecard_recipients"
+                            <input ngModel type="text" name="ecard.recipients" id="tribute_ecard_recipients"
                                    placeholder="Recipient's Email Address*" required>
                         </div>
-                        <div class="donate-sm-col-6 donate-xs-col-12">
+                        <div class="col-sm-6 col-xs-12">
                             <label for="tribute_ecard_subject" class="sr-only">E-Card Subject Line*</label>
-                            <input type="text" name="ecard.subject" id="tribute_ecard_subject"
+                            <input ngModel type="text" name="ecard.subject" id="tribute_ecard_subject"
                                    placeholder="E-Card Subject Line*" required>
                         </div>
-                        <div class="donate-xs-col-12 clearfix"></div>
-                        <div class="donate-xs-col-12">
+                        <div class="col-xs-12 clearfix"></div>
+                        <div class="col-xs-12">
                             <label for="tribute_ecard_message" class="sr-only">E-Card Message*</label>
                             <label id="tribute_ecard_message_length_warning" class="error" for="tribute_ecard_message"
                                    style="display:none;">&nbsp;<span aria-hidden="true" class="donate-exclamation-mark">
@@ -639,54 +648,57 @@
                                       placeholder="E-Card Message*" required maxlength="255"
                                       data-maxlength="255"></textarea>
                         </div>
-                        <div class="donate-xs-col-12 clearfix">The E-Card is a digital version of our printed card.
+                        <div class="col-xs-12 clearfix">The E-Card is a digital version of our printed card.
                         </div>
-                        <input type="hidden" id="ecard_id" name="ecard.id" value="">
-                        <div class="donate-xs-col-12 clearfix spacer"></div>
+                        <input type="hidden" id="ecard_id" name="ecard.id" [(ngModel)]="donation.ecard">
+                        <div class="col-xs-12 clearfix spacer"></div>
                     </fieldset>
-                    <div class="donate-xs-col-12 clearfix spacer"></div>
+                    <div class="col-xs-12 clearfix spacer"></div>
                 </div>
-                <div class="donate-row spacer-line"></div>
-                <div class="donate-row">
-                    <h4 class="section-header donate-xs-col-12">PAYMENT</h4>
-                    <fieldset id="payment_type_options" class="selection-buttons donate-xs-col-12">
-                        <div class="selection-button-container three-button-container">
+                <div class="spacer-line" *ngIf="formInfo?.supportsEcard === 'true' && donation.tributeType !== ''"></div>
+                <div class="row">
+                    <h4 class="section-header col-xs-12">PAYMENT</h4>
+                    <fieldset id="payment_type_options" class="selection-buttons col-xs-12">
+                        <div class="selection-button-container three-button-container" *ngIf="formInfo?.paymentCards">
                             <div class="selection-button-inner">
-                                <label for="payment_type_credit" class="selection-button">
-                                    <input type="radio" value="credit" name="payment_type" id="payment_type_credit">
+                                <label for="payment_type_credit" class="selection-button" [ngClass]="{selected: donation.paymentType === 'credit' }">
+                                    <input type="radio" value="credit" name="payment_type" id="payment_type_credit" [(ngModel)]="donation.paymentType">
                                     <span class="selection-button-text selection-button-long-text">Credit Card</span>
                                 </label>
                             </div>
                         </div>
-                        <div class="selection-button-container three-button-container">
+                        <div class="selection-button-container three-button-container" *ngIf="formInfo?.bankTransfers === 'true'">
                             <div class="selection-button-inner">
-                                <label for="payment_type_ach" class="selection-button">
-                                    <input type="radio" value="ach" name="payment_type" id="payment_type_ach">
+                                <label for="payment_type_ach" class="selection-button"  [ngClass]="{selected: donation.paymentType === 'ach' }">
+                                    <input type="radio" value="ach" name="payment_type" id="payment_type_ach" [(ngModel)]="donation.paymentType">
                                     <span id="payment_type_ach_text"
                                           class="selection-button-text selection-button-long-text">Bank Withdrawal</span>
                                 </label>
                             </div>
                         </div>
-                        <div class="selection-button-container three-button-container">
+                        <div class="selection-button-container three-button-container" *ngIf="formInfo?.externalProcessors">
                             <div class="selection-button-inner">
-                                <label for="payment_type_paypal" class="selection-button">
-                                    <input type="radio" value="paypal" name="payment_type" id="payment_type_paypal">
+                                <label for="payment_type_paypal" class="selection-button"  [ngClass]="{selected: donation.paymentType === 'paypal' }">
+                                    <input type="radio" value="paypal" name="payment_type" id="payment_type_paypal" [(ngModel)]="donation.paymentType">
                                     <span class="selection-button-text">Paypal</span>
                                 </label>
                             </div>
                         </div>
                     </fieldset>
-                    <div class="donate-xs-col-12 clearfix spacer"></div>
-                    <fieldset style="display:none;" id="payment_credit_fields">
-                        <div class="donate-sm-col-6 donate-xs-col-12">
+                    <div class="col-xs-12 clearfix spacer"></div>
+                    <fieldset id="payment_credit_fields" *ngIf="donation.paymentType === 'credit'">
+                        <div class="col-sm-6 col-xs-12">
+                            <!--<div *ngIf="submitAttempt && !ccNum.valid" class="error">-->
+                                <!--<span class="donate-exclamation-mark" aria-hidden="true">-->
+                                <!--<img src="../img/warning_exclamation.png"></span><span class="sr-only">Error:</span> This field is required</div>-->
                             <label for="payment_credit_card_num" class="sr-only">Credit Card Number*</label>
-                            <input type="text" name="card_number" id="payment_credit_card_num"
+                            <input ngModel type="text" name="card_number" id="payment_credit_card_num"
                                    placeholder="Credit Card Number*" required data-rule-creditcard="true">
                         </div>
-                        <div class="donate-sm-col-3 donate-xs-col-6">
+                        <div class="col-sm-3 col-xs-6">
                             <div class="donate-select">
                                 <label for="payment_credit_card_exp_month" class="sr-only">Exp. Month*</label>
-                                <select name="card_exp_date_month" id="payment_credit_card_exp_month" required>
+                                <select ngModel name="card_exp_date_month" id="payment_credit_card_exp_month" required>
                                     <option value="">Exp. Month*</option>
                                     <option value="1">01</option>
                                     <option value="2">02</option>
@@ -703,10 +715,10 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="donate-sm-col-3 donate-xs-col-6">
+                        <div class="col-sm-3 col-xs-6">
                             <div class="donate-select">
                                 <label for="payment_credit_card_exp_year" class="sr-only">Exp. Year*</label>
-                                <select name="card_exp_date_year" id="payment_credit_card_exp_year" required>
+                                <select ngModel name="card_exp_date_year" id="payment_credit_card_exp_year" required>
                                     <option value="">Exp. Year*</option>
                                     <option value="2015">2015</option>
                                     <option value="2016">2016</option>
@@ -722,90 +734,89 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="donate-xs-col-12 clearfix"></div>
-                        <div class="donate-xs-col-6">
+                        <div class="col-xs-12 clearfix"></div>
+                        <div class="col-xs-6">
                             <label for="payment_credit_card_cvv" class="sr-only">Security Code*</label>
-                            <input type="text" name="card_cvv" id="payment_credit_card_cvv" placeholder="Security Code*"
+                            <input ngModel type="text" name="card_cvv" id="payment_credit_card_cvv" placeholder="Security Code*"
                                    required>
                         </div>
-                        <div class="donate-xs-col-6">
+                        <div class="col-xs-6">
                             <div id="whats_this_cvv_help" class="whatsthis">
                                 <a title="What is this?" class="HelpLink"
                                    href="http://help.convio.net/site/PageServer?s_site=fhcrc&amp;pagename=user_donation_cvv"
                                    target="_blank">What is this?</a>
                             </div>
                         </div>
-                        <div class="donate-xs-col-12 clearfix spacer"></div>
+                        <div class="col-xs-12 clearfix spacer"></div>
                     </fieldset>
-                    <fieldset style="display:none;" id="payment_ach_fields">
-                        <div class="donate-sm-col-6 donate-xs-col-12">
+                    <fieldset id="payment_ach_fields" *ngIf="donation.paymentType === 'ach'">
+                        <div class="col-sm-6 col-xs-12">
                             <label for="payment_ach_routing" class="sr-only">Bank Routing Number*</label>
-                            <input type="text" name="ach_routing" id="payment_ach_routing"
+                            <input ngModel type="text" name="ach_routing" id="payment_ach_routing"
                                    placeholder="Bank Routing Number*" required>
                         </div>
-                        <div class="donate-xs-col-6">
+                        <div class="col-xs-6">
                             <div id="whats_this_ach_help" class="whatsthis">
                                 <a class="HelpLink"
                                    href="http://help.convio.net/site/PageServer?s_site=fhcrc&pagename=User_Donation_ACH"
                                    target="_blank">What is this?</a>
                             </div>
                         </div>
-                        <div class="donate-xs-col-12 clearfix"></div>
-                        <div class="donate-sm-col-6 donate-xs-col-12">
+                        <div class="col-xs-12 clearfix"></div>
+                        <div class="col-sm-6 col-xs-12">
                             <label for="payment_ach_account" class="sr-only">Bank Account Number*</label>
-                            <input type="text" name="ach_account" id="payment_ach_account"
+                            <input ngModel type="text" name="ach_account" id="payment_ach_account"
                                    placeholder="Bank Account Number*" required>
                         </div>
-                        <div class="donate-sm-col-6 donate-xs-col-12">
+                        <div class="col-sm-6 col-xs-12">
                             <label for="payment_ach_account_verify" class="sr-only">Verify Bank Account Number*</label>
-                            <input type="text" name="ach_account_verify" id="payment_ach_account_verify"
+                            <input ngModel type="text" name="ach_account_verify" id="payment_ach_account_verify"
                                    placeholder="Verify Bank Account Number*" required
                                    data-rule-equalto="#payment_ach_account">
                         </div>
-                        <div class="donate-xs-col-12 clearfix"></div>
-                        <div class="donate-xs-col-12">
-                            <div class="checkbox-container" id="ach_authorize_container">
-                                <input type="checkbox" name="ach_authorize" id="ach_authorize" required>
+                        <div class="col-xs-12 clearfix"></div>
+                        <div class="col-xs-12">
+                            <div class="checkbox-container" id="ach_authorize_container" [ngClass]="{selected: donation.bankWithdrawalAgreement === true }">
+                                <input type="checkbox" name="ach_authorize" id="ach_authorize" required [(ngModel)]="donation.bankWithdrawalAgreement">
                                 <label for="ach_authorize" class="checkbox_label" id="ach_auth_label">By checking this
                                     option, I agree to use my bank account as a payment method and authorize this
                                     organization to debit my bank account to fulfill my donation commitment.</label>
                             </div>
                         </div>
-                        <div class="donate-xs-col-12 clearfix spacer"></div>
+                        <div class="col-xs-12 clearfix spacer"></div>
                     </fieldset>
                     <fieldset id="billing_info_fields">
-                        <div class="donate-sm-col-6 donate-xs-col-12">
+                        <div class="col-sm-6 col-xs-12">
                             <label for="billing_name_first" class="sr-only">First Name*</label>
-                            <input type="text" name="billing.name.first" id="billing_name_first"
-                                   placeholder="First Name*" required value="[[S1:first_name]]">
+                            <input ngModel type="text" name="billing.name.first" id="billing_name_first"
+                                   placeholder="First Name*" required value="">
                         </div>
-                        <div class="donate-sm-col-6 donate-xs-col-12">
+                        <div class="col-sm-6 col-xs-12">
                             <label for="billing_name_last" class="sr-only">Last Name*</label>
-                            <input type="text" name="billing.name.last" id="billing_name_last" placeholder="Last Name*"
-                                   required value="[[S1:last_name]]">
+                            <input ngModel type="text" name="billing.name.last" id="billing_name_last" placeholder="Last Name*"
+                                   required value="">
                         </div>
-                        <div class="donate-xs-col-12 clearfix"></div>
-                        <div class="donate-sm-col-6 donate-xs-col-12">
+                        <div class="col-xs-12 clearfix"></div>
+                        <div class="col-sm-6 col-xs-12">
                             <label for="billing_address_street1" class="sr-only">Street Address Line 1*</label>
-                            <input type="text" name="billing.address.street1" id="billing_address_street1"
-                                   placeholder="Street Address Line 1*" required value="[[S1:home_street1]]">
+                            <input ngModel type="text" name="billing.address.street1" id="billing_address_street1"
+                                   placeholder="Street Address Line 1*" required value="">
                         </div>
-                        <div class="donate-sm-col-6 donate-xs-col-12">
+                        <div class="col-sm-6 col-xs-12">
                             <label for="billing_address_street2" class="sr-only">Street Address Line 2</label>
-                            <input type="text" name="billing.address.street2" id="billing_address_street2"
-                                   placeholder="Street Address Line 2" value="[[S1:home_street2]]">
+                            <input ngModel type="text" name="billing.address.street2" id="billing_address_street2"
+                                   placeholder="Street Address Line 2" value="">
                         </div>
-                        <div class="donate-xs-col-12 clearfix"></div>
-                        <div class="donate-sm-col-6 donate-xs-col-12">
+                        <div class="col-xs-12 clearfix"></div>
+                        <div class="col-sm-6 col-xs-12">
                             <label for="billing_address_city" class="sr-only">City*</label>
-                            <input type="text" name="billing.address.city" id="billing_address_city" placeholder="City*"
-                                   required value="[[S1:home_city]]">
+                            <input ngModel type="text" name="billing.address.city" id="billing_address_city" placeholder="City*"
+                                   required value="">
                         </div>
-                        <div class="donate-sm-col-3 donate-xs-col-12">
+                        <div class="col-sm-3 col-xs-12">
                             <div class="donate-select">
                                 <label for="billing_address_state" class="sr-only">State*</label>
-                                <select name="billing.address.state" id="billing_address_state" required>
-                                    [[E130:[[T8:
+                                <select ngModel name="billing.address.state" id="billing_address_state" required>
                                     <option value="">State*</option>
                                     <option value="AK">AK - Alaska</option>
                                     <option value="AL">AL - Alabama</option>
@@ -883,22 +894,19 @@
                                     <option value="SK">SK - Saskatchewan</option>
                                     <option value="YT">YT - Yukon</option>
                                     <option value="None">None</option>
-                                    ]] [[T8:value="[[S1:home_stateprov]]"]] [[T8:value="[[S1:home_stateprov]]"
-                                    selected="selected"]] replaceall]]
                                 </select>
                             </div>
                         </div>
-                        <div class="donate-sm-col-3 donate-xs-col-12">
+                        <div class="col-sm-3 col-xs-12">
                             <label for="billing_address_zip" class="sr-only">ZIP*</label>
-                            <input type="text" name="billing.address.zip" id="billing_address_zip" placeholder="ZIP*"
-                                   required value="[[S1:home_zip]]">
+                            <input ngModel type="text" name="billing.address.zip" id="billing_address_zip" placeholder="ZIP*"
+                                   required value="">
                         </div>
-                        <div class="donate-xs-col-12 clearfix"></div>
-                        <div class="donate-sm-col-6 donate-xs-col-12">
+                        <div class="col-xs-12 clearfix"></div>
+                        <div class="col-sm-6 col-xs-12">
                             <div class="donate-select">
                                 <label for="billing_address_country" class="sr-only">Country*</label>
-                                <select name="billing.address.country" id="billing_address_country" required>
-                                    [[E130:[[T8:
+                                <select ngModel name="billing.address.country" id="billing_address_country" required>
                                     <option value="">Country*</option>
                                     <option value="United States">United States</option>
                                     <option value="United Kingdom">United Kingdom</option>
@@ -1158,71 +1166,70 @@
                                     <option value="Yemen">Yemen</option>
                                     <option value="Zambia">Zambia</option>
                                     <option value="Zimbabwe">Zimbabwe</option>
-                                    ]] [[T8:value="[[S1:home_country]]"]] [[T8:value="[[S1:home_country]]"
-                                    selected="selected"]] replaceall]]
                                 </select>
                             </div>
                         </div>
-                        <div class="donate-xs-col-12 clearfix spacer"></div>
-                        <div class="donate-xs-col-12">
+                        <div class="col-xs-12 clearfix spacer"></div>
+                        <div class="col-xs-12">
                             <label for="donor_email" class="sr-only">Email Address*</label>
-                            <input type="text" name="donor.email" id="donor_email" placeholder="Email Address*" required
-                                   data-rule-email="true" value="[[S1:primary_email]]">
+                            <input ngModel type="email" name="donor.email" id="donor_email" placeholder="Email Address*" required
+                                   data-rule-email="true" value="">
                         </div>
-                        <div class="donate-xs-col-12 clearfix spacer"></div>
+                        <div class="col-xs-12 clearfix spacer"></div>
                     </fieldset>
-                    <div class="donate-xs-col-12 clearfix spacer"></div>
+                    <div class="col-xs-12 clearfix spacer"></div>
                 </div>
-                <div class="donate-row spacer-line"></div>
-                <div class="donate-row">
-                    <h4 class="section-header donate-xs-col-12">JOINT DONOR RECOGNITION</h4>
-                    <div class="donate-xs-col-12">
-                        <div class="checkbox-container">
-                            <input type="checkbox" name="include_joint_donor" id="joint_donor_option">
+                <div class="spacer-line"></div>
+                <div class="row">
+                    <h4 class="section-header col-xs-12">JOINT DONOR RECOGNITION</h4>
+                    <div class="col-xs-12">
+                        <div class="checkbox-container" [ngClass]="{selected: donation.jointDonor === true }">
+                            <input type="checkbox" name="include_joint_donor" id="joint_donor_option" [(ngModel)]="donation.jointDonor">
                             <label for="joint_donor_option" class="checkbox-label">Include spouse/partner name with the
                                 donation.</label>
                         </div>
                     </div>
-                    <fieldset style="display:none;" id="joint_donor_information">
-                        <div class="donate-sm-col-6 donate-xs-col-12">
+                    <fieldset id="joint_donor_information" *ngIf="donation.jointDonor === true">
+                        <div class="col-sm-6 col-xs-12">
                             <label for="joint_donor_name_first" class="sr-only">Donor First Name*</label>
-                            <input type="text" name="joint_donor.name.first" id="joint_donor_name_first"
+                            <input ngModel type="text" name="joint_donor.name.first" id="joint_donor_name_first"
                                    placeholder="Donor First Name*" required>
                         </div>
-                        <div class="donate-sm-col-6 donate-xs-col-12">
+                        <div class="col-sm-6 col-xs-12">
                             <label for="joint_donor_name_last" class="sr-only">Donor Last Name*</label>
-                            <input type="text" name="joint_donor.name.last" id="joint_donor_name_last"
+                            <input ngModel type="text" name="joint_donor.name.last" id="joint_donor_name_last"
                                    placeholder="Donor Last Name*" required>
                         </div>
-                        <div class="donate-xs-col-12 clearfix spacer"></div>
+                        <div class="col-xs-12 clearfix spacer"></div>
                     </fieldset>
-                    <div class="donate-xs-col-12 clearfix spacer"></div>
+                    <div class="col-xs-12 clearfix spacer"></div>
                 </div>
-                <div class="donate-row spacer-line"></div>
-                <div class="donate-row">
-                    <div class="donate-xs-col-12 clearfix spacer"></div>
-                    <div class="donate-xs-col-12">
-                        <div class="checkbox-container">
-                            <input type="checkbox" name="anonymous" id="anonymous_donation">
+                <div class="spacer-line"></div>
+                <div class="row">
+                    <div class="col-xs-12 clearfix spacer"></div>
+                    <div class="col-xs-12">
+                        <div class="checkbox-container" [ngClass]="{selected: donation.isAnonymous === true }">
+                            <input type="checkbox" name="anonymous" id="anonymous_donation" [(ngModel)]="donation.isAnonymous">
                             <label for="anonymous_donation" class="checkbox-label">Make this donation anonymous.</label>
                         </div>
                     </div>
-                    <div class="donate-xs-col-12">
-                        <div class="checkbox-container selected">
+                    <div class="col-xs-12">
+                        <div class="checkbox-container" [ngClass]="{selected: donation.emailOptIn === true }">
                             <input type="checkbox" name="donor.email_opt_in" id="email-opt-in" value="true"
-                                   checked="checked">
+                                   checked="checked" [(ngModel)]="donation.emailOptIn">
                             <label for="email-opt-in" class="checkbox-label">Yes, I would like to receive emails from
-                                Fred Hutch.</label>
+                                {{settings.organization}}</label>
                         </div>
                     </div>
-                    <div class="donate-xs-col-12 clearfix spacer"></div>
-                    <div class="donate-xs-col-12 clearfix spacer"></div>
+                    <div class="col-xs-12 clearfix spacer"></div>
+                    <div class="col-xs-12 clearfix spacer"></div>
                 </div>
-                <div class="donate-row donate-form-error" id="donate_form_error_bottom" style="display:none;"><h4
+                <div class="row donate-form-error" id="donate_form_error_bottom" *ngIf="hasErrors"><h4
                         class="error">Error: Your donation failed to process. Please verify your payment information and
                     try again.</h4></div>
-                <div class="donate-row">
-                    <button id="donate-submit" type="submit">
+                <div class="row">
+                    <button id="donate-submit" type="submit" [disabled]="isSubmitting">
+                    <!--<button id="donate-submit" type="submit" [disabled]="!heroForm.form.valid || isSubmitting">-->
                         GIVE NOW
                     </button>
                     <div id="donate-submitted" class="button" style="display:none;"><span class="donate-submitted-text">PROCESSING</span>
@@ -1230,14 +1237,6 @@
                     <a id="donate-submit-paypal" href="" class="button" style="display:none;"><span
                             class="donate-submitted-text">CONTINUE TO<br/>PAYPAL</span></a>
                 </div>
-                <div class="donate-row clearfix spacer"></div>
-                <div class="donate-row">
-                    <div class="donate-xs-col-12 clearfix spacer"></div>
-                    <div id="secure_ssl_seal" class="donate-xs-col-12">
-                        [[S66:payment/verisign_seal.tpt]]
-                    </div>
-                    <div class="donate-xs-col-12 clearfix spacer"></div>
-                </div>
             </form>
-        </div> <!-- end #donate -->
+         <!-- end #donate -->
     </div>
