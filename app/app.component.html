@@ -1,12 +1,4 @@
 <div class="container">
-    <script type="text/javascript">
-        window.df_id = 6960; // changed to use Project Violet api pagebuilder page, SLD 5/28/15
-        window.ecard_honor_id = 2541;
-        window.ecard_memorial_id = 2542;
-        window.default_desig = '[[T6:[[S334:fund]]]]';
-        window.designation_options = '[[T6:[[?TT::[[?yy::y[[S334:experience]]y::F::T]][[?xTRUEx::x[[E151:[[S334:experience]]_funds]]x::T::F]]::[[E51:[[S334:experience]]_funds]]::[[?xTRUEx::x[[E151:[[S334:pagename]]_funds]]x::[[E51:[[S334:pagename]]_funds]]::[[S51:donate_api_funds]]]]]]]]';
-        window.success_redirect = "[[S11:23]][[?[[S11:23]]::&::&::?]]pagename=[[?TT::[[?yy::y[[S334:experience]]y::F::T]][[?xTRUEx::x[[E151:[[S334:experience]]_thanks]]x::T::F]]::[[S334:experience]]_thanks::[[?xTRUEx::x[[E151:[[S334:pagename]]_thanks]]x::[[S334:pagename]]_thanks::donate_api_thanks]]]]";
-    </script>
     <div id="donate" class="" [ngClass]="{submitted: submitAttempt === true }">
 
         <!--{{heroForm.value | json}}-->
@@ -23,13 +15,13 @@
                 <input ngModel type="hidden" value="1.0" name="v">
                 <span *ngIf="donation.paymentType === 'paypal'">
                     <!-- add hidden input for extproc -->
-                    <input ngModel type="hidden" name="extproc" id="inptextproc" value="paypal">
+                    <input [(ngModel)]="donation.extProc" type="hidden" name="extproc" id="inptextproc" value="paypal">
                     <!-- add PayPal/Amazon SUCCESS redrect (must be static url) -->
-                    <input ngModel type="hidden"
+                    <input [(ngModel)]="donation.successRedirect" type="hidden"
                            value=""
                            name="finish_success_redirect" id="finish_success_redirect">
                     <!-- add PayPal/Amazon ERROR redrect must be static url) -->
-                    <input ngModel type="hidden"
+                    <input [(ngModel)]="donation.errorRedirect" type="hidden"
                            value=""
                            name="finish_error_redirect" id="finish_error_redirect">
                 </span>
@@ -72,12 +64,12 @@
                             </div>
                         </fieldset>
                         <div class=" clearfix spacer"></div>
-                        <div class="" *ngIf="formInfo?.supportsLevelAutorepeat === 'true'">
-                            <div class="checkbox-container" [ngClass]="{selected: donation.recurring === true }">
+                        <div class="checkbox-container checkbox" *ngIf="formInfo?.supportsLevelAutorepeat === 'true'" [ngClass]="{selected: donation.recurring === true }">
+                            <label for="level_autorepeat" class="">
                                 <input type="checkbox" name="level_autorepeat" id="level_autorepeat" [(ngModel)]="donation.recurring">
-                                <label for="level_autorepeat" class="checkbox-label">Yes, make this a recurring MONTHLY
-                                    DONATION.</label>
-                            </div>
+                                <span class="cr"><i class="cr-icon glyphicon glyphicon-ok"></i></span>Yes, make this a recurring MONTHLY
+                                DONATION.
+                            </label>
                         </div>
                         <div class="" *ngIf="formInfo?.supportsDesignation === 'true'">
                             <h4 class="section-header">Direct my gift to:</h4>
@@ -109,7 +101,7 @@
                                 <label for="honor_memorial_honor" class="selection-button" [ngClass]="{selected: donation.tributeType === 'tribute' }">
                                     <input type="radio" value="tribute" name="tribute.type" id="honor_memorial_honor" [(ngModel)]="donation.tributeType">
                                     <span class="selection-button-text">In Honor<span
-                                            class="donate-xs-hidden"> of</span></span>
+                                            class="hidden-xs"> of</span></span>
                                 </label>
                             </div>
                         </div>
@@ -119,13 +111,13 @@
                                     <input type="radio" value="memorial" name="tribute.type"
                                            id="honor_memorial_memorial" [(ngModel)]="donation.tributeType">
                                     <span class="selection-button-text">In Memory<span
-                                            class="donate-xs-hidden"> of</span></span>
+                                            class="hidden-xs"> of</span></span>
                                 </label>
                             </div>
                         </div>
                     </fieldset>
                     <div id="memorial_help_text" class="col-xs-12" *ngIf="donation.tributeType === 'memorial'">Choose "In Memory<span
-                            class="donate-xs-hidden"> of</span>" only if the person you are honoring is deceased.
+                            class="hidden-xs"> of</span>" only if the person you are honoring is deceased.
                     </div>
                     <div class="col-xs-12 clearfix spacer"></div>
                     <fieldset id="honoree-information" *ngIf="donation.tributeType !== ''">
@@ -160,7 +152,7 @@
                                 <label for="tribute_print" class="selection-button" [ngClass]="{selected: donation.tributeCardType === 'print' }">
                                     <input type="radio" value="print" name="tribute_option" id="tribute_print" [(ngModel)]="donation.tributeCardType">
                                     <span class="selection-button-text selection-button-long-text"><span
-                                            class="donate-xs-hidden">Send </span>Printed Card</span>
+                                            class="hidden-xs">Send </span>Printed Card</span>
                                 </label>
                             </div>
                         </div>
@@ -168,7 +160,7 @@
                             <div class="selection-button-inner">
                                 <label for="tribute_ecard" class="selection-button" [ngClass]="{selected: donation.tributeCardType === 'ecard' }">
                                     <input type="radio" value="ecard" name="tribute_option" id="tribute_ecard" [(ngModel)]="donation.tributeCardType">
-                                    <span class="selection-button-text"><span class="donate-xs-hidden">Send </span>E-Card</span>
+                                    <span class="selection-button-text"><span class="hidden-xs">Send </span>E-Card</span>
                                 </label>
                             </div>
                         </div>
@@ -580,9 +572,9 @@
                                    placeholder="Closing signature">
                         </div>
                         <div class="col-xs-12 clearfix spacer"></div>
-                        <!--<h4 class="section-subheader col-sm-12 donate-xs-hidden">Card Preview</h4>-->
+                        <!--<h4 class="section-subheader col-sm-12 hidden-xs">Card Preview</h4>-->
                         <div class="col-xs-12 clearfix spacer"></div>
-                        <div class="col-sm-4 donate-xs-hidden">
+                        <div class="col-sm-4 hidden-xs">
                             <a href="#ecard_front" class="ecard-preview" rel="modal:open">
                                 <!--<img class="img-responsive" src="../img/2014_MemoryCardFinal_Preview_FRONT.jpg">-->
                             </a>
@@ -595,7 +587,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-sm-4 donate-xs-hidden">
+                        <div class="col-sm-4 hidden-xs">
                             <a href="#ecard_inside" class="ecard-preview" rel="modal:open">
                                 <!--<img class="img-responsive" src="../img/2014_MemoryCardFinal_Preview_INSIDE.jpg">-->
                             </a>
@@ -610,7 +602,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-sm-4 donate-xs-hidden">
+                        <div class="col-sm-4 hidden-xs">
                             <a href="#ecard_back" class="ecard-preview" rel="modal:open">
                                 <!--<img class="img-responsive" src="../img/2014_MemoryCardFinal_Preview_BACK.jpg">-->
                             </a>
@@ -623,7 +615,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-sm-12 donate-xs-hidden clearfix spacer"></div>
+                        <div class="col-sm-12 clearfix spacer"></div>
                     </fieldset>
                     <fieldset id="tribute_ecard_fields"  *ngIf="donation.tributeCardType === 'ecard'">
                         <input ngModel type="hidden" name="ecard.send" value="true" id="ecard_send">
@@ -676,7 +668,7 @@
                                 </label>
                             </div>
                         </div>
-                        <div class="selection-button-container three-button-container" *ngIf="formInfo?.externalProcessors">
+                        <div class="selection-button-container three-button-container" *ngIf="formInfo?.externalProcessors?.externalProcessor">
                             <div class="selection-button-inner">
                                 <label for="payment_type_paypal" class="selection-button"  [ngClass]="{selected: donation.paymentType === 'paypal' }">
                                     <input type="radio" value="paypal" name="payment_type" id="payment_type_paypal" [(ngModel)]="donation.paymentType">
@@ -776,11 +768,14 @@
                         </div>
                         <div class="col-xs-12 clearfix"></div>
                         <div class="col-xs-12">
-                            <div class="checkbox-container" id="ach_authorize_container" [ngClass]="{selected: donation.bankWithdrawalAgreement === true }">
-                                <input type="checkbox" name="ach_authorize" id="ach_authorize" required [(ngModel)]="donation.bankWithdrawalAgreement">
-                                <label for="ach_authorize" class="checkbox_label" id="ach_auth_label">By checking this
+                            <div class="checkbox-container checkbox" id="ach_authorize_container" [ngClass]="{selected: donation.bankWithdrawalAgreement === true }">
+                                <label for="ach_authorize" class="checkbox_label" id="ach_auth_label">
+                                    <input type="checkbox" name="ach_authorize" id="ach_authorize" required [(ngModel)]="donation.bankWithdrawalAgreement">
+                                    <span class="cr"><i class="cr-icon glyphicon glyphicon-ok"></i></span>
+                                    By checking this
                                     option, I agree to use my bank account as a payment method and authorize this
-                                    organization to debit my bank account to fulfill my donation commitment.</label>
+                                    organization to debit my bank account to fulfill my donation commitment.
+                                </label>
                             </div>
                         </div>
                         <div class="col-xs-12 clearfix spacer"></div>
@@ -1183,10 +1178,13 @@
                 <div class="row">
                     <h4 class="section-header col-xs-12">JOINT DONOR RECOGNITION</h4>
                     <div class="col-xs-12">
-                        <div class="checkbox-container" [ngClass]="{selected: donation.jointDonor === true }">
-                            <input type="checkbox" name="include_joint_donor" id="joint_donor_option" [(ngModel)]="donation.jointDonor">
-                            <label for="joint_donor_option" class="checkbox-label">Include spouse/partner name with the
-                                donation.</label>
+                        <div class="checkbox-container checkbox" [ngClass]="{selected: donation.jointDonor === true }">
+                            <label for="joint_donor_option" class="checkbox-label">
+                                <input type="checkbox" name="include_joint_donor" id="joint_donor_option" [(ngModel)]="donation.jointDonor">
+                                <span class="cr"><i class="cr-icon glyphicon glyphicon-ok"></i></span>
+                                Include spouse/partner name with the
+                                donation.
+                            </label>
                         </div>
                     </div>
                     <fieldset id="joint_donor_information" *ngIf="donation.jointDonor === true">
@@ -1208,16 +1206,19 @@
                 <div class="row">
                     <div class="col-xs-12 clearfix spacer"></div>
                     <div class="col-xs-12">
-                        <div class="checkbox-container" [ngClass]="{selected: donation.isAnonymous === true }">
-                            <input type="checkbox" name="anonymous" id="anonymous_donation" [(ngModel)]="donation.isAnonymous">
-                            <label for="anonymous_donation" class="checkbox-label">Make this donation anonymous.</label>
+                        <div class="checkbox-container checkbox" [ngClass]="{selected: donation.isAnonymous === true }">
+                            <label for="anonymous_donation" class="checkbox-label">
+                                <input type="checkbox" name="anonymous" id="anonymous_donation" [(ngModel)]="donation.isAnonymous">
+                                <span class="cr"><i class="cr-icon glyphicon glyphicon-ok"></i></span>Make this donation anonymous.</label>
                         </div>
                     </div>
                     <div class="col-xs-12">
-                        <div class="checkbox-container" [ngClass]="{selected: donation.emailOptIn === true }">
-                            <input type="checkbox" name="donor.email_opt_in" id="email-opt-in" value="true"
-                                   checked="checked" [(ngModel)]="donation.emailOptIn">
-                            <label for="email-opt-in" class="checkbox-label">Yes, I would like to receive emails from
+                        <div class="checkbox-container checkbox" [ngClass]="{selected: donation.emailOptIn === true }">
+                            <label for="email-opt-in" class="checkbox-label">
+                                <input type="checkbox" name="donor.email_opt_in" id="email-opt-in" value="true"
+                                       checked="checked" [(ngModel)]="donation.emailOptIn">
+                                <span class="cr"><i class="cr-icon glyphicon glyphicon-ok"></i></span>
+                                Yes, I would like to receive emails from
                                 {{settings.organization}}</label>
                         </div>
                     </div>
