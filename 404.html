@@ -1,28 +1,33 @@
 <!doctype html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <title>NgLoDonate</title>
-  <base href="/ng-lo-donate/">
+    <meta charset="utf-8">
+    <title>NgLODonate</title>
+    <base href="/migration-project/">
 
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://secure2.convio.net/fhcrc/fredhutch/reskin/css/clientlibs.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/styles/main.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script>
+        var DF_CONFIG = {
+            organization: 'Embrace Kids Foundation.',
+            df_id: 20486,
+            secure_url: 'https://secure2.convio.net/vateam',
+            success_redirect: 'http://blackbaud.com',
+            error_redirect: 'http://blackbaud.com',
+            ecards: [
+                {
+                    id: 0,
+                    img: 'img/sample-ecard.png'
+                }
+            ],
+            debug: false,
+            api_key: '123456789'
+        };</script>
 </head>
 <body>
-  <app-root>Loading...</app-root>
-  
-    <script src="vendor/es6-shim/es6-shim.js"></script>
-    <script src="vendor/reflect-metadata/Reflect.js"></script>
-    <script src="vendor/systemjs/dist/system.src.js"></script>
-    <script src="vendor/zone.js/dist/zone.js"></script>
-    <script>
-      System.import('system-config.js').then(function () {
-        System.import('main');
-      }).catch(console.error.bind(console));
-    </script>
-  
-</body>
+<app-root>Loading...</app-root>
+<script type="text/javascript" src="inline.js"></script><script type="text/javascript" src="styles.b52d2076048963e7cbfd.bundle.js"></script><script type="text/javascript" src="main.3fcb8cf8ab35e9aec155.bundle.js"></script></body>
 </html>
